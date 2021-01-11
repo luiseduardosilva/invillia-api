@@ -1,0 +1,44 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:10
+    container_name: invillia-postgres
+    restart: always
+    volumes:
+      - "postgres-data:/var/lib/postgresql/data"
+    environment:
+      - POSTGRES_USER=invillia
+      - POSTGRES_PASSWORD=invillia
+      - POSTGRES_DB=invillia
+    ports:
+      - "5432:5432"
+    networks:
+      - invillia-network
+  php:
+    build: etc/php-fpm
+    container_name: invillia-php
+    restart: always
+    volumes:
+      - ./:/var/www/laravel
+    networks:
+      - invillia-network
+  nginx:
+    build: etc/nginx
+    container_name: invillia-api
+    restart: always
+    ports:
+      - '8000:80'
+    depends_on:
+      - php
+    links:
+      - php
+    volumes:
+      - ./logs/nginx/:/var/log/nginx
+    networks:
+      - invillia-network
+networks:
+  invillia-network:
+    driver: bridge
+volumes:
+  postgres-data:
+
